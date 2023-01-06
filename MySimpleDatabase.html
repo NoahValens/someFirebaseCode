@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Demo</title>
+    <link rel="stylesheet" href="output.css">
+    <style>
+        body{text-align: center}
+        #enterDetails{float:left; width: 50%; background-color: darkslategray; color: floralwhite}
+        #findDetails{float:left; width: 50%; background-color: floralwhite; color: darkslategray}
+        input {width: 120px}
+        
+    </style>
+</head>
+<body>
+    <h1 class="bg-red-400">Hello Tailwind</h1>
+    <div id="enterDetails">
+        <h1>Enter Details</h1>
+        <h4>ID</h4>
+        <input id="enterID" type="text">
+        <h4>Name</h4>
+        <input id="enterName" type="text">
+        <h4>Age</h4>
+        <input id="enterAge" type="number">
+        <br />
+        <br />
+        <button id="insert">INSERT</button>
+        <button id="update">UPDATE</button>
+        <button id="remove">REMOVE</button>
+
+    </div>
+
+    <div id="findDetails">
+        <h1>Find by ID</h1>
+        <h4>ID</h4>
+        <input id="findID" type="text">
+        <br />
+        <br />
+        <button id="find">FIND</button>
+        
+        <h3 id="findName" type="text"></h3>
+        <h3 id="findAge" type="text"></h3>
+
+    </div>
+
+    <div>
+        <br />
+        <br />
+        <h2 id="replaceWithName">Hello!</h2>
+        <button type="button" class="login-with-google-btn" id="authWithGoogle">Auth with Google</button>
+    </div>
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+      
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyC6nMVZz-SWrUzLAZYCr9Rst5LZz-4osrM",
+          authDomain: "videodemo-abad0.firebaseapp.com",
+          databaseURL: "https://videodemo-abad0-default-rtdb.firebaseio.com",
+          projectId: "videodemo-abad0",
+          storageBucket: "videodemo-abad0.appspot.com",
+          messagingSenderId: "47551454812",
+          appId: "1:47551454812:web:670722e453b9f88bc51099"
+        };
+      
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig)
+        const auth = getAuth(app)
+       
+        // Import Dependencies 
+        import {getDatabase, ref, get, set, child, update, remove}
+        from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js"
+        
+        import { getAuth, signInWithPopup, GoogleAuthProvider }
+        from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js"
+
+        const db = getDatabase()
+        const provider = new GoogleAuthProvider()
+
+        var replaceWithName = document.querySelector('#replaceWithName')
+        var authWithGoogle = document.querySelector('#authWithGoogle')
+        var enterID = document.querySelector('#enterID')
+        var enterName = document.querySelector('#enterName')
+        var enterAge = document.querySelector('#enterAge')
+        var findID = document.querySelector('#findID')
+        var findName = document.querySelector('#findName')
+        var findAge = document.querySelector('#findAge')
+
+        var insertBtn = document.querySelector('#insert')
+        var updateBtn = document.querySelector('#update')
+        var removeBtn = document.querySelector('#remove')
+        var findBtn = document.querySelector('#find')
+
+
+        function googleAuthh() {
+            signInWithPopup(auth, provider).then(cred => {
+                console.log(cred.user.displayName)
+                replaceWithName.innerHTML = "Welcome, " + cred.user.displayName
+                //redirect to home page for users to start adding in information
+                alert("Auth is a sucess!")
+            }).catch((err) => {
+                alert(err)
+            })
+        }
+
+        function insertData() {
+            set(ref(db, "People/"+ enterID.value),{
+                Name: enterName.value,
+                ID: enterID.value,
+                Age: enterAge.value
+            })
+            .then(()=>{
+                alert("Data added successfully!");
+                enterName.clear()
+            })
+            .catch((error)=>{
+                alert(error);
+            });
+        }
+
+        function findData() {
+            const dbref = ref(db)
+
+            get(child(dbref, "People/" + findID.value))
+            .then((snapshot) => {
+                if (snapshot.exists()) {
+                    //check if I can replace innerHTML with textContent or innerText
+                    findName.innerHTML = "Name: " + snapshot.val().Name
+                    findAge.innerHTML = "Age: " + snapshot.val().Age
+                } else {
+                    alert("Data does not exist")
+                }
+            })
+            .catch((error) => {
+                alert(error)
+            })
+        }
+
+        function updateData() {
+            update(ref(db, "People/" + enterID.value), {
+                Name: enterName.value,
+                Age: enterAge.value
+            })
+            .then(() => {
+                alert("Data updated successfully!")
+            })
+            .catch ((error) => {
+                alert(error)
+            })
+        }
+
+        function removeData() {
+            remove(ref(db, "People/" + enterID.value), {})
+            .then(() => {
+                alert("Data removed successfully!")
+            })
+            .catch ((error) => {
+                alert(error)
+            })
+        }
+
+        authWithGoogle.addEventListener("click", googleAuthh)
+        insertBtn.addEventListener('click', insertData)
+        updateBtn.addEventListener("click", updateData)
+        findBtn.addEventListener("click", findData)
+        removeBtn.addEventListener("click", removeData)
+
+      </script>
+
+</body>
+</html>
